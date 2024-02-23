@@ -1,12 +1,8 @@
-const mysql = require('mysql2/promise');
+const { Client } = require('cassandra-driver');
 
-const dbConfig = {
-    host: 'localhost',
-    user: 'root', // replace with your MySQL username
-    password: 'Qqwerty1!', // replace with your MySQL password
-    database: 'library', // replace with your database name
-};
-
-const pool = mysql.createPool(dbConfig);
-
-module.exports = pool;
+const client = new Client({
+    contactPoints: ['2.132.176.53/32'], // Replace with the IP addresses of your ScyllaDB nodes
+    localDataCenter: 'datacenter1', // Replace with your datacenter name
+    keyspace: 'my_keyspace', // Replace with your keyspace name
+    credentials: { username: 'scylla', password: 'gnbLq8UKijd3X1r' } // Replace with your credentials
+});

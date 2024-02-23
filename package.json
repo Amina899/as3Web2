@@ -22,7 +22,8 @@
     "nodemailer": "^6.9.8",
     "scylladb-driver": "^0.0.1-dev",
     "swagger-jsdoc": "^6.2.8",
-    "swagger-ui-express": "^5.0.0"
+    "swagger-ui-express": "^5.0.0",
+    "uuid": "^9.0.1"
   },
   "description": "",
   "devDependencies": {

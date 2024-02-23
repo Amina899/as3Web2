@@ -2,6 +2,7 @@ const db = require('../db');
 const { validationResult, check } = require('express-validator');
 const validation = require('../utils/validation');
 const { sendEmailNotification } = require('../services/emailService');
+const uuid = require('uuid');
 
 const validateBook = [
     check('name').isLength({ min: 2, max: 30 }).withMessage('Invalid value for Name'),
@@ -15,6 +16,8 @@ const bookController = {
     getAllBooks: async (req, res) => {
         try {
             console.log(`[${new Date().toISOString()}] INFO: Route: GET /books, IP: ${req.ip}`);
+            await db.execute('INSERT INTO logs (id, log_level, route, user_ip) VALUES (?, ?, ?, ?)',
+              [uuid.v4(), 'info', '/books', req.ip]);
             const [rows] = await db.query('SELECT * FROM books');
             res.json(rows);
         } catch (error) {
@@ -35,6 +38,8 @@ const bookController = {
             await db.query('INSERT INTO books SET ?', newBook);
             sendEmailNotification(newBook);
             console.log(`[${new Date().toISOString()}] INFO: Route: POST /books, IP: ${req.ip}, Book added: ${JSON.stringify(newBook)}`);
+            await db.execute('INSERT INTO logs (id, log_level, route, user_ip) VALUES (?, ?, ?, ?)',
+              [uuid.v4(), 'info', '/books/add', req.ip]);
             res.json({ message: 'Book added successfully' });
         } catch (error) {
             console.error(`[${new Date().toISOString()}] ERROR: Route: POST /books, IP: ${req.ip}, Error: ${error}`);
@@ -52,16 +57,14 @@ const bookController = {
 
             const bookId = req.params.id;
             const updatedBook = req.body;
-            const [result] = await db.query('UPDATE books SET ? WHERE id = ?', [updatedBook, bookId]);
-            console.log(`[${new Date().toISOString()}] INFO: Route: POST /books, IP: ${req.ip}, Book updated: ${JSON.stringify(updatedBook)}`);
+            await db.query('UPDATE books SET ? WHERE id = ?', [updatedBook, bookId]);
+            console.log(`[${new Date().toISOString()}] INFO: Route: PUT /books/${bookId}/update, IP: ${req.ip}, Book updated: ${JSON.stringify(updatedBook)}`);
+            await db.execute('INSERT INTO logs (id, log_level, route, user_ip) VALUES (?, ?, ?, ?)',
+              [uuid.v4(), 'info', `/books/${bookId}/update`, req.ip]);
 
-            if (result.affectedRows > 0) {
-                res.json({ message: 'Book updated successfully' });
-            } else {
-                res.status(404).json({ message: 'Book not found' });
-            }
+            res.json({ message: 'Book updated successfully' });
         } catch (error) {
-            console.error(`[${new Date().toISOString()}] ERROR: Route: POST /books, IP: ${req.ip}, Error: ${error}`);
+            console.error(`[${new Date().toISOString()}] ERROR: Route: PUT /books/${bookId}/update, IP: ${req.ip}, Error: ${error}`);
             res.status(500).json({ message: 'Error updating book' });
         }
     },
@@ -69,28 +72,15 @@ const bookController = {
     deleteBook: async (req, res) => {
         try {
             const bookId = req.params.id;
-            const [result] = await db.query('DELETE FROM books WHERE id = ?', bookId);
-            console.log(`[${new Date().toISOString()}] INFO: Route: POST /books, IP: ${req.ip} `);
+            await db.query('DELETE FROM books WHERE id = ?', bookId);
+            console.log(`[${new Date().toISOString()}] INFO: Route: DELETE /books/${bookId}/delete, IP: ${req.ip}`);
+            await db.execute('INSERT INTO logs (id, log_level, route, user_ip) VALUES (?, ?, ?, ?)',
+              [uuid.v4(), 'info', `/books/${bookId}/delete`, req.ip]);
 
-            if (result.affectedRows > 0) {
-                res.json({ message: 'Book deleted successfully' });
-            } else {
-                res.status(404).json({ message: 'Book not found' });
-            }
+            res.json({ message: 'Book deleted successfully' });
         } catch (error) {
-            console.error(`[${new Date().toISOString()}] ERROR: Route: POST /books, IP: ${req.ip}, Error: ${error}`);
+            console.error(`[${new Date().toISOString()}] ERROR: Route: DELETE /books/${bookId}/delete, IP: ${req.ip}, Error: ${error}`);
             res.status(500).json({ message: 'Error deleting book' });
-        }
-    },
-
-    exportBooks: async (req, res) => {
-        try {
-            const [rows] = await db.query('SELECT * FROM books');
-            console.log(`[${new Date().toISOString()}] INFO: Route: POST /books, IP: ${req.ip} `);
-            res.json(rows);
-        } catch (error) {
-            console.error(`[${new Date().toISOString()}] ERROR: Route: POST /books, IP: ${req.ip}, Error: ${error}`);
-            res.status(500).json({ message: 'Error exporting data' });
         }
     },
 };

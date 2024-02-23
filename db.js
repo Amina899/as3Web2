@@ -1,18 +1,10 @@
-const { Client } = require('scylladb-driver');
+const { Client } = require('cassandra-driver');
 
-// ScyllaDB Cloud connection
-const contactPoints = [
-    'node-0.gce-us-east-1.4a038f4b6f7dcc6f7c25.clusters.scylla.cloud',
-    'node-1.gce-us-east-1.4a038f4b6f7dcc6f7c25.clusters.scylla.cloud',
-    'node-2.gce-us-east-1.4a038f4b6f7dcc6f7c25.clusters.scylla.cloud'
-]; // Replace with your cluster endpoint
-const username = 'scylla';
-const password = 'gnbLq8UKijd3X1r';
-
-// Create a new instance of the ScyllaDB client
 const client = new Client({
-    contactPoints,
-    credentials: { username, password }
+    contactPoints: ['localhost'], // Use 'localhost' since ScyllaDB is running in a Docker container
+    localDataCenter: 'datacenter1',
+    keyspace: 'your_keyspace', // Replace with your keyspace name
 });
 
 module.exports = client;
+

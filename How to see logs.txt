@@ -1,0 +1,17 @@
+ docker exec -it scylla-container cqlsh
+
+cqlsh> USE your_keyspace;
+cqlsh:your_keyspace> CREATE TABLE IF NOT EXISTS logs (
+                 ...     id UUID PRIMARY KEY,
+                 ...     log_level TEXT,
+                 ...     route TEXT,
+                 ...     user_ip TEXT
+                 ... );
+cqlsh:your_keyspace> select * from logs;
+
+ id                                   | log_level | route  | user_ip
+--------------------------------------+-----------+--------+---------
+ 6aa71e93-91ee-4578-b744-5c751ab6f841 |      info | /books |     ::1
+
+(1 rows)
+

@@ -14,10 +14,11 @@ const validateBook = [
 const bookController = {
     getAllBooks: async (req, res) => {
         try {
+            console.log(`[${new Date().toISOString()}] INFO: Route: GET /books, IP: ${req.ip}`);
             const [rows] = await db.query('SELECT * FROM books');
             res.json(rows);
         } catch (error) {
-            console.error(error);
+            console.error(`[${new Date().toISOString()}] ERROR: Route: GET /books, IP: ${req.ip}, Error: ${error}`);
             res.status(500).json({ message: 'Error fetching books' });
         }
     },
@@ -33,9 +34,10 @@ const bookController = {
             const newBook = req.body;
             await db.query('INSERT INTO books SET ?', newBook);
             sendEmailNotification(newBook);
+            console.log(`[${new Date().toISOString()}] INFO: Route: POST /books, IP: ${req.ip}, Book added: ${JSON.stringify(newBook)}`);
             res.json({ message: 'Book added successfully' });
         } catch (error) {
-            console.error(error);
+            console.error(`[${new Date().toISOString()}] ERROR: Route: POST /books, IP: ${req.ip}, Error: ${error}`);
             res.status(500).json({ message: 'Error adding book' });
         }
     },
@@ -51,6 +53,7 @@ const bookController = {
             const bookId = req.params.id;
             const updatedBook = req.body;
             const [result] = await db.query('UPDATE books SET ? WHERE id = ?', [updatedBook, bookId]);
+            console.log(`[${new Date().toISOString()}] INFO: Route: POST /books, IP: ${req.ip}, Book updated: ${JSON.stringify(updatedBook)}`);
 
             if (result.affectedRows > 0) {
                 res.json({ message: 'Book updated successfully' });
@@ -58,7 +61,7 @@ const bookController = {
                 res.status(404).json({ message: 'Book not found' });
             }
         } catch (error) {
-            console.error(error);
+            console.error(`[${new Date().toISOString()}] ERROR: Route: POST /books, IP: ${req.ip}, Error: ${error}`);
             res.status(500).json({ message: 'Error updating book' });
         }
     },
@@ -67,6 +70,7 @@ const bookController = {
         try {
             const bookId = req.params.id;
             const [result] = await db.query('DELETE FROM books WHERE id = ?', bookId);
+            console.log(`[${new Date().toISOString()}] INFO: Route: POST /books, IP: ${req.ip} `);
 
             if (result.affectedRows > 0) {
                 res.json({ message: 'Book deleted successfully' });
@@ -74,7 +78,7 @@ const bookController = {
                 res.status(404).json({ message: 'Book not found' });
             }
         } catch (error) {
-            console.error(error);
+            console.error(`[${new Date().toISOString()}] ERROR: Route: POST /books, IP: ${req.ip}, Error: ${error}`);
             res.status(500).json({ message: 'Error deleting book' });
         }
     },
@@ -82,9 +86,10 @@ const bookController = {
     exportBooks: async (req, res) => {
         try {
             const [rows] = await db.query('SELECT * FROM books');
+            console.log(`[${new Date().toISOString()}] INFO: Route: POST /books, IP: ${req.ip} `);
             res.json(rows);
         } catch (error) {
-            console.error(error);
+            console.error(`[${new Date().toISOString()}] ERROR: Route: POST /books, IP: ${req.ip}, Error: ${error}`);
             res.status(500).json({ message: 'Error exporting data' });
         }
     },
